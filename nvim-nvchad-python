@@ -1,0 +1,32 @@
+FROM python:alpine3.16
+
+# ARG USER_ID
+
+RUN apk update
+RUN apk add curl git ripgrep g++ xclip neovim
+
+#py3-lsp-server
+#nerd-fonts
+
+# RUN adduser -D $USER_ID
+# USER $USER_ID
+
+ENV \
+   TZ="Europe/Madrid" \
+   LANG="en_US.UTF-8" \
+   LC_ALL="en_US.UTF-8" \
+   TERM="xterm-256color" \
+   EDITOR="nvim" \
+   WORKSPACE="/mnt/workspace" \
+   LANG="en_US.UTF-8"
+
+RUN git clone https://github.com/usen-io/NvChad.git /root/.config/nvim -b python && \
+# RUN git clone https://github.com/NvChad/NvChad /root/.config/nvim && \
+    nvim --headless +PackerCompile +sleep33 +qa 2>> /root/packerCompile-nvim.error.log && \
+    nvim --headless +PackerSync +sleep33 +UpdateRemotePlugins +sleep33 +qa 2>> /root/packageSync-updateRemotePlugin-nvim.error.log && \
+    nvim --headless +sleep30 +qa 2>> /root/sleep-nvim.error.log
+
+WORKDIR /mnt/workspace
+
+ENTRYPOINT ["nvim"]
+
