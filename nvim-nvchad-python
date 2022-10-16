@@ -20,7 +20,7 @@ ENV \
    WORKSPACE="/mnt/workspace" \
    LANG="en_US.UTF-8"
 
-RUN git clone https://github.com/usen-io/NvChad.git /root/.config/nvim -b python && \
+RUN git clone https://github.com/usen-io/NvChad.git /root/.config/nvim -b custom && \
 # RUN git clone https://github.com/NvChad/NvChad /root/.config/nvim && \
     nvim --headless +PackerCompile +sleep33 +qa 2>> /root/packerCompile-nvim.error.log && \
     nvim --headless +PackerSync +sleep33 +UpdateRemotePlugins +sleep33 +qa 2>> /root/packageSync-updateRemotePlugin-nvim.error.log && \
