@@ -1,0 +1,73 @@
+# syntax=docker/dockerfile:1
+
+FROM alpine:latest AS builder
+
+ARG BUILD_DEPS="autoconf automake cmake curl g++ gettext gettext-dev git libtool make ninja openssl pkgconfig unzip binutils"
+
+ARG TARGET=stable
+
+RUN apk add --no-cache ${BUILD_DEPS} && \
+
+  git clone https://github.com/neovim/neovim.git /tmp/neovim && \
+
+  cd /tmp/neovim && \
+
+	git checkout tags/${TARGET} && \
+
+  # Patch bug in build script on stable
+
+  # see https://github.com/neovim/neovim/commit/38145b919d160ea63c2547533595e761b40cfe45
+
+  # git cherry-pick -n 38145b919d160ea63c2547533595e761b40cfe45 && \
+
+  make CMAKE_BUILD_TYPE=Release && \
+
+  make CMAKE_INSTALL_PREFIX=/usr/local install && \
+
+  strip /usr/local/bin/nvim
+
+#######################################################
+
+
+FROM python:alpine3.16
+
+# ARG USER_ID
+
+RUN apk update
+
+ARG FINAL_DEPS="git ripgrep g++ xclip py3-lsp-server"
+
+COPY --from=builder /usr/local /usr/local/
+
+RUN true # see: https://github.com/moby/moby/issues/37965
+
+COPY --from=builder /lib/ld-musl-x86_64.so.1 /lib/
+
+COPY --from=builder /usr/lib/libgcc_s.so.1 /usr/lib/
+
+COPY --from=builder /usr/lib/libintl.so.8 /usr/lib/
+
+ENV \
+   TZ="Europe/Madrid" \
+   LANG="en_US.UTF-8" \
+   LC_ALL="en_US.UTF-8" \
+   TERM="xterm-256color" \
+   EDITOR="nvim" \
+   WORKSPACE="/mnt/workspace" \
+   LANG="en_US.UTF-8"
+
+RUN apk add --no-cache ${FINAL_DEPS} && \
+    git clone https://github.com/usen-io/NvChad.git /root/.config/nvim -b custom-jedi_language_server && \
+    nvim --headless +PackerCompile +sleep33 +qa 2>> /root/packerCompile-nvim.error.log && \
+    nvim --headless +PackerSync +sleep33 +UpdateRemotePlugins +sleep33 +qa 2>> /root/packageSync-updateRemotePlugin-nvim.error.log && \
+    nvim --headless +sleep30 +qa 2>> /root/sleep-nvim.error.log
+
+#nvim --headless '+MasonInstall pyright' +sleep39 +qa 2>> /root/masonInstall-updateRemotePlugin-nvim.error.log
+
+#RUN nvim --headless '+PylspInstall pyls-flake8 pylsp-mypy pyls-isort' +sleep63 2>> /root/PyInstall-nvim.error.log
+
+
+WORKDIR /mnt/workspace
+
+ENTRYPOINT ["nvim"]
+
