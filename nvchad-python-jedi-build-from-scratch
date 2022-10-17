@@ -28,10 +28,7 @@ RUN apk add --no-cache ${BUILD_DEPS} && \
 
 #######################################################
 
-
 FROM python:alpine3.16
-
-# ARG USER_ID
 
 RUN apk update
 
@@ -57,15 +54,10 @@ ENV \
    LANG="en_US.UTF-8"
 
 RUN apk add --no-cache ${FINAL_DEPS} && \
-    git clone https://github.com/usen-io/NvChad.git /root/.config/nvim -b custom-jedi_language_server && \
+    git clone https://github.com/usen-io/NvChad.git /root/.config/nvim -b python-minimal-jedi && \
     nvim --headless +PackerCompile +sleep33 +qa 2>> /root/packerCompile-nvim.error.log && \
     nvim --headless +PackerSync +sleep33 +UpdateRemotePlugins +sleep33 +qa 2>> /root/packageSync-updateRemotePlugin-nvim.error.log && \
     nvim --headless +sleep30 +qa 2>> /root/sleep-nvim.error.log
-
-#nvim --headless '+MasonInstall pyright' +sleep39 +qa 2>> /root/masonInstall-updateRemotePlugin-nvim.error.log
-
-#RUN nvim --headless '+PylspInstall pyls-flake8 pylsp-mypy pyls-isort' +sleep63 2>> /root/PyInstall-nvim.error.log
-
 
 WORKDIR /mnt/workspace
 
