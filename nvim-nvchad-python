@@ -3,7 +3,10 @@ FROM python:alpine3.16
 # ARG USER_ID
 
 RUN apk update
-RUN apk add curl git ripgrep g++ xclip neovim
+RUN apk add curl git ripgrep g++ xclip neovim nodejs npm
+
+# RUN pip install --upgrade pip && pip install pyright
+# RUN pip install --upgrade pip && pip install jedi-language-server
 
 #py3-lsp-server
 #nerd-fonts
@@ -21,10 +24,13 @@ ENV \
    LANG="en_US.UTF-8"
 
 RUN git clone https://github.com/usen-io/NvChad.git /root/.config/nvim -b custom && \
-# RUN git clone https://github.com/NvChad/NvChad /root/.config/nvim && \
     nvim --headless +PackerCompile +sleep33 +qa 2>> /root/packerCompile-nvim.error.log && \
     nvim --headless +PackerSync +sleep33 +UpdateRemotePlugins +sleep33 +qa 2>> /root/packageSync-updateRemotePlugin-nvim.error.log && \
-    nvim --headless +sleep30 +qa 2>> /root/sleep-nvim.error.log
+    nvim --headless +sleep30 +qa 2>> /root/sleep-nvim.error.log && \
+    nvim --headless '+MasonInstall pyright' +sleep39 +qa 2>> /root/masonInstall-updateRemotePlugin-nvim.error.log
+
+#RUN nvim --headless '+PylspInstall pyls-flake8 pylsp-mypy pyls-isort' +sleep63 2>> /root/PyInstall-nvim.error.log
+
 
 WORKDIR /mnt/workspace
 
